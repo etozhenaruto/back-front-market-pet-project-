@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отзывы - BeerTestShop</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom styles -->
+    <link href="/css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/" data-testid="nav-brand">
+                <i class="bi bi-cup-straw"></i> BeerTestShop
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/" data-testid="nav-home">Главная</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/catalog.html" data-testid="nav-catalog">Каталог</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/feedback.html" data-testid="nav-feedback">Отзывы</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/cart.html" data-testid="nav-cart">
+                            <i class="bi bi-cart"></i> Корзина
+                        </a>
+                    </li>
+                    <li class="nav-item" id="admin-link" style="display: none;">
+                        <a class="nav-link" href="/admin.html" data-testid="nav-admin">
+                            <i class="bi bi-gear"></i> Админ
+                        </a>
+                    </li>
+                </ul>
+                <div id="nav-auth-container" class="d-flex align-items-center">
+                    <!-- Будет заполнено через auth.js -->
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <main class="flex-grow-1 py-4">
+        <div class="container">
+            <h1 class="mb-4" data-testid="feedback-page-title">Отзывы о наших продуктах</h1>
+
+            <!-- Уведомления -->
+            <div id="notification-container" class="toast-container" aria-live="polite"></div>
+
+            <div class="row">
+                <!-- Форма создания отзыва -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0" data-testid="form-title">
+                                <i class="bi bi-pencil-square"></i> Оставить отзыв
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="feedback-form" novalidate>
+                                <div class="mb-3">
+                                    <label for="feedback-author-name" class="form-label" data-testid="label-author-name">
+                                        <i class="bi bi-person"></i> Ваше имя
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        id="feedback-author-name" 
+                                        name="authorName"
+                                        placeholder="Иван Петров"
+                                        required
+                                        minlength="2"
+                                        maxlength="100"
+                                        data-testid="input-author-name"
+                                    >
+                                    <div class="invalid-feedback" data-testid="error-author-name">
+                                        Введите имя (2-100 символов)
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="feedback-author-email" class="form-label" data-testid="label-author-email">
+                                        <i class="bi bi-envelope"></i> Email
+                                    </label>
+                                    <input 
+                                        type="email" 
+                                        class="form-control" 
+                                        id="feedback-author-email" 
+                                        name="authorEmail"
+                                        placeholder="ivan@example.com"
+                                        required
+                                        data-testid="input-author-email"
+                                    >
+                                    <div class="invalid-feedback" data-testid="error-author-email">
+                                        Введите корректный email
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="feedback-message" class="form-label" data-testid="label-message">
+                                        <i class="bi bi-chat-left-text"></i> Сообщение
+                                    </label>
+                                    <textarea 
+                                        class="form-control" 
+                                        id="feedback-message" 
+                                        name="message"
+                                        rows="4"
+                                        placeholder="Расскажите о вашем опыте..."
+                                        required
+                                        minlength="10"
+                                        maxlength="1000"
+                                        data-testid="input-message"
+                                    ></textarea>
+                                    <div class="invalid-feedback" data-testid="error-message">
+                                        Сообщение должно содержать от 10 до 1000 символов
+                                    </div>
+                                    <small class="text-muted" data-testid="message-hint">
+                                        Минимум 10 символов
+                                    </small>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button 
+                                        type="submit" 
+                                        class="btn btn-beer" 
+                                        data-testid="btn-submit-feedback"
+                                    >
+                                        <i class="bi bi-send"></i> Отправить отзыв
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Список отзывов -->
+                <div class="col-lg-8">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0" data-testid="reviews-title">
+                            <i class="bi bi-chat-quote"></i> Отзывы покупателей
+                        </h5>
+                        <span class="badge bg-primary" id="feedback-count" data-testid="feedback-count">0</span>
+                    </div>
+
+                    <!-- Индикатор загрузки -->
+                    <div id="loading-spinner" class="loading-spinner" data-testid="loading-spinner">
+                        <div class="spinner-border text-warning" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                    </div>
+
+                    <!-- Список отзывов -->
+                    <div id="feedback-list" data-testid="feedback-list">
+                        <!-- Отзывы будут загружены через JS -->
+                    </div>
+
+                    <!-- Сообщение если нет отзывов -->
+                    <div id="no-feedback" class="text-center py-5 hidden" data-testid="no-feedback">
+                        <i class="bi bi-chat-left-text" style="font-size: 4rem; color: #dee2e6;"></i>
+                        <h3 class="mt-3 text-muted">Отзывов пока нет</h3>
+                        <p class="text-muted">Будьте первым, кто оставит отзыв!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0" data-testid="footer-copyright">
+                        &copy; 2026 BeerTestShop. Все права защищены.
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" data-testid="footer-about">О нас</a> |
+                    <a href="#" data-testid="footer-contact">Контакты</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- API module -->
+    <script src="/js/api.js"></script>
+    <!-- Auth module -->
+    <script src="/js/auth.js"></script>
+    
+    <script>
+        let feedbackList = [];
+        
+        // Показать уведомление
+        function showNotification(message, type = 'success') {
+            const container = document.getElementById('notification-container');
+            const toastId = 'toast-' + Date.now();
+            
+            const toastHtml = `
+                <div id="${toastId}" class="toast align-items-center text-white bg-${type} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+                            ${escapeHtml(message)}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', toastHtml);
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+            
+            toastElement.addEventListener('hidden.bs.toast', () => toastElement.remove());
+        }
+        
+        // Форматирование даты
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ru-RU', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // Отрисовка отзыва (XSS защита через textContent)
+        function renderFeedbackCard(feedback, index) {
+            const card = document.createElement('div');
+            card.className = 'card feedback-card shadow-sm mb-3';
+            card.setAttribute('data-testid', `feedback-card-${feedback.id}`);
+            
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body';
+            
+            // Заголовок с именем и датой
+            const header = document.createElement('div');
+            header.className = 'd-flex justify-content-between align-items-start mb-2';
+            
+            const authorDiv = document.createElement('div');
+            const authorName = document.createElement('strong');
+            authorName.className = 'feedback-author';
+            authorName.setAttribute('data-testid', `feedback-author-${feedback.id}`);
+            authorName.textContent = feedback.authorName; // XSS защита
+            
+            const authorEmail = document.createElement('div');
+            authorEmail.className = 'feedback-email';
+            authorEmail.setAttribute('data-testid', `feedback-email-${feedback.id}`);
+            authorEmail.textContent = feedback.authorEmail; // XSS защита
+            
+            authorDiv.appendChild(authorName);
+            authorDiv.appendChild(authorEmail);
+            
+            const dateSpan = document.createElement('small');
+            dateSpan.className = 'feedback-date';
+            dateSpan.setAttribute('data-testid', `feedback-date-${feedback.id}`);
+            dateSpan.textContent = formatDate(feedback.createdAt);
+            
+            header.appendChild(authorDiv);
+            header.appendChild(dateSpan);
+            
+            // Текст отзыва (XSS защита)
+            const messageDiv = document.createElement('div');
+            messageDiv.setAttribute('data-testid', `feedback-message-${feedback.id}`);
+            messageDiv.textContent = feedback.message; // XSS защита через textContent
+            
+            cardBody.appendChild(header);
+            cardBody.appendChild(messageDiv);
+            card.appendChild(cardBody);
+            
+            return card;
+        }
+        
+        // Загрузка отзывов
+        async function loadFeedback() {
+            const spinner = document.getElementById('loading-spinner');
+            const feedbackListEl = document.getElementById('feedback-list');
+            const noFeedback = document.getElementById('no-feedback');
+            const countLabel = document.getElementById('feedback-count');
+            
+            try {
+                feedbackList = await getFeedback();
+                
+                spinner.classList.add('hidden');
+                
+                if (feedbackList.length === 0) {
+                    feedbackListEl.innerHTML = '';
+                    noFeedback.classList.remove('hidden');
+                    countLabel.textContent = '0';
+                    return;
+                }
+                
+                noFeedback.classList.add('hidden');
+                feedbackListEl.innerHTML = '';
+                
+                feedbackList.forEach((feedback, index) => {
+                    const card = renderFeedbackCard(feedback, index);
+                    feedbackListEl.appendChild(card);
+                });
+                
+                countLabel.textContent = feedbackList.length;
+                
+            } catch (error) {
+                spinner.classList.add('hidden');
+                feedbackListEl.innerHTML = '';
+                noFeedback.classList.remove('hidden');
+                noFeedback.querySelector('h3').textContent = 'Ошибка загрузки';
+                showNotification('Не удалось загрузить отзывы', 'danger');
+            }
+        }
+        
+        // Отправка формы отзыва
+        document.getElementById('feedback-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const form = this;
+            const authorNameInput = document.getElementById('feedback-author-name');
+            const authorEmailInput = document.getElementById('feedback-author-email');
+            const messageInput = document.getElementById('feedback-message');
+            const submitBtn = document.querySelector('[data-testid="btn-submit-feedback"]');
+            
+            // Валидация
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+            
+            // Блокировка кнопки
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Отправка...';
+            
+            try {
+                await createFeedback({
+                    authorName: authorNameInput.value.trim(),
+                    authorEmail: authorEmailInput.value.trim(),
+                    message: messageInput.value.trim()
+                });
+                
+                showNotification('Ваш отзыв успешно отправлен!');
+                
+                // Очистка формы
+                form.reset();
+                form.classList.remove('was-validated');
+                
+                // Перезагрузка списка
+                await loadFeedback();
+                
+            } catch (error) {
+                showNotification(error.message || 'Ошибка отправки отзыва', 'danger');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-send"></i> Отправить отзыв';
+            }
+        });
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFeedback();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+/**
+ * Основные стили приложения BeerTestShop.
+ */
+
+:root {
+    --beer-primary: #f59e0b;
+    --beer-secondary: #78350f;
+    --beer-light: #fef3c7;
+    --beer-dark: #451a03;
+}
+
+body {
+    background-color: #fafafa;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Навигация */
+.navbar-brand {
+    font-weight: bold;
+    color: var(--beer-secondary) !important;
+}
+
+.navbar-brand:hover {
+    color: var(--beer-dark) !important;
+}
+
+/* Карточки товаров */
+.product-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.product-card img {
+    height: 200px;
+    object-fit: cover;
+    background-color: var(--beer-light);
+}
+
+.product-card .card-body {
+    padding: 1.25rem;
+}
+
+.product-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--beer-secondary);
+}
+
+.product-quantity {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.product-status-inactive {
+    opacity: 0.6;
+    background-color: #e9ecef;
+}
+
+/* Корзина */
+.cart-item {
+    border-bottom: 1px solid #dee2e6;
+    padding: 1rem 0;
+}
+
+.cart-item:last-child {
+    border-bottom: none;
+}
+
+.cart-total {
+    background-color: var(--beer-light);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.cart-total h4 {
+    color: var(--beer-dark);
+}
+
+/* Отзывы */
+.feedback-card {
+    border-left: 4px solid var(--beer-primary);
+    background-color: #fff;
+    margin-bottom: 1rem;
+}
+
+.feedback-author {
+    font-weight: 600;
+    color: var(--beer-secondary);
+}
+
+.feedback-email {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.feedback-date {
+    font-size: 0.75rem;
+    color: #adb5bd;
+}
+
+/* Формы */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--beer-primary);
+    box-shadow: 0 0 0 0.2rem rgba(245, 158, 11, 0.25);
+}
+
+.btn-beer {
+    background-color: var(--beer-primary);
+    border-color: var(--beer-primary);
+    color: #000;
+}
+
+.btn-beer:hover {
+    background-color: #d97706;
+    border-color: #d97706;
+}
+
+.btn-beer-outline {
+    background-color: transparent;
+    border-color: var(--beer-primary);
+    color: var(--beer-primary);
+}
+
+.btn-beer-outline:hover {
+    background-color: var(--beer-primary);
+    color: #000;
+}
+
+/* Главная страница */
+.hero-section {
+    background: linear-gradient(135deg, var(--beer-light) 0%, #fff 100%);
+    padding: 4rem 0;
+    margin-bottom: 2rem;
+}
+
+.hero-section h1 {
+    color: var(--beer-dark);
+    font-size: 3rem;
+}
+
+.hero-section p {
+    color: #6c757d;
+    font-size: 1.25rem;
+}
+
+/* Админ панель */
+.admin-table {
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.admin-table th {
+    background-color: var(--beer-secondary);
+    color: #fff;
+    font-weight: 600;
+}
+
+.admin-table tr:hover {
+    background-color: var(--beer-light);
+}
+
+/* Уведомления */
+.toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1050;
+}
+
+/* Футер */
+.footer {
+    margin-top: auto;
+    background-color: var(--beer-dark);
+    color: #fff;
+    padding: 1.5rem 0;
+}
+
+.footer a {
+    color: var(--beer-primary);
+}
+
+.footer a:hover {
+    color: #fff;
+}
+
+/* Заглушка для изображений */
+.image-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--beer-light);
+    color: var(--beer-secondary);
+    font-size: 3rem;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .product-price {
+        font-size: 1.25rem;
+    }
+}
+
+/* Состояние загрузки */
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+}
+
+/* Скрытый элемент */
+.hidden {
+    display: none !important;
+}
+
+/* Статусы */
+.badge-active {
+    background-color: #198754;
+}
+
+.badge-inactive {
+    background-color: #6c757d;
+}
