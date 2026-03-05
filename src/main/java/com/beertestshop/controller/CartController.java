@@ -2,24 +2,19 @@ package com.beertestshop.controller;
 
 import com.beertestshop.dto.AddToCartRequest;
 import com.beertestshop.dto.CartDto;
-import com.beertestshop.exception.ResourceNotFoundException;
-import com.beertestshop.model.Cart;
-import com.beertestshop.service.InMemoryCartService;
-import com.beertestshop.service.InMemoryUserService;
+import com.beertestshop.service.CartService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -32,92 +27,56 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Cart", description = "API для управления корзиной")
 public class CartController {
 
-    private final InMemoryCartService cartService;
-    private final InMemoryUserService userService;
+    private final CartService cartService;
+
+    // Используем фиксированный ID для корзины (без авторизации)
+    private static final Long DEFAULT_CART_ID = 1L;
 
     /**
-     * Получить текущую корзину пользователя.
+     * Получить текущую корзину.
      */
     @GetMapping
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @Operation(summary = "Получить корзину", description = "Возвращает корзину текущего пользователя")
+    @Operation(summary = "Получить корзину", description = "Возвращает корзину")
     public ResponseEntity<CartDto> getCart() {
-        Long userId = getCurrentUserId();
-        log.debug("Getting cart for user: {}", userId);
-
-        Cart cart = cartService.getCart(userId)
-                .orElseGet(() -> cartService.getOrCreateCart(userId));
-
-        return ResponseEntity.ok(cartService.toDto(cart));
+        log.debug("Getting cart");
+        CartDto cart = cartService.getCartByUserId(DEFAULT_CART_ID);
+        return ResponseEntity.ok(cart);
     }
 
     /**
      * Добавить товар в корзину.
      */
     @PostMapping("/add")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @Operation(summary = "Добавить товар в корзину", description = "Добавляет товар в корзину текущего пользователя")
+    @Operation(summary = "Добавить товар в корзину", description = "Добавляет товар в корзину")
     public ResponseEntity<CartDto> addToCart(@Valid @RequestBody AddToCartRequest request) {
-        Long userId = getCurrentUserId();
-        log.info("User {} adding {} items of product {} to cart", userId, request.getQuantity(), request.getProductId());
+        log.info("Adding {} items of product {} to cart", request.getQuantity(), request.getProductId());
 
-        Cart cart = cartService.addItem(userId, request);
-
-        log.info("Cart updated for user {}: {} items", userId, cart.getItems().size());
-        return ResponseEntity.ok(cartService.toDto(cart));
+        CartDto cart = cartService.addItem(DEFAULT_CART_ID, request.getProductId(), request.getQuantity());
+        log.info("Cart updated: {} items", cart.getItems().size());
+        return ResponseEntity.ok(cart);
     }
 
     /**
      * Удалить товар из корзины.
      */
     @DeleteMapping("/remove")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Удалить товар из корзины", description = "Удаляет товар из корзины по ID продукта")
-    public ResponseEntity<CartDto> removeFromCart(Long productId) {
-        Long userId = getCurrentUserId();
-        log.info("User {} removing product {} from cart", userId, productId);
+    public ResponseEntity<CartDto> removeFromCart(@RequestParam Long productId) {
+        log.info("Removing product {} from cart", productId);
 
-        Cart cart = cartService.removeItem(userId, productId);
-
-        if (cart == null) {
-            cart = cartService.getOrCreateCart(userId);
-        }
-
-        return ResponseEntity.ok(cartService.toDto(cart));
+        CartDto cart = cartService.removeItem(DEFAULT_CART_ID, productId);
+        return ResponseEntity.ok(cart);
     }
 
     /**
      * Очистить корзину.
      */
     @DeleteMapping("/clear")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @Operation(summary = "Очистить корзину", description = "Очищает корзину текущего пользователя")
+    @Operation(summary = "Очистить корзину", description = "Очищает корзину")
     public ResponseEntity<CartDto> clearCart() {
-        Long userId = getCurrentUserId();
-        log.info("User {} clearing cart", userId);
+        log.info("Clearing cart");
 
-        Cart cart = cartService.clearCart(userId);
-
-        if (cart == null) {
-            cart = cartService.getOrCreateCart(userId);
-        }
-
-        return ResponseEntity.ok(cartService.toDto(cart));
-    }
-
-    /**
-     * Получить ID текущего авторизованного пользователя.
-     */
-    private Long getCurrentUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated() ||
-                "anonymousUser".equals(authentication.getPrincipal())) {
-            throw new ResourceNotFoundException("User not authenticated");
-        }
-
-        String username = authentication.getName();
-        return userService.findByUsername(username)
-                .map(com.beertestshop.model.User::getId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", 0L));
+        CartDto cart = cartService.clearCart(DEFAULT_CART_ID);
+        return ResponseEntity.ok(cart);
     }
 }

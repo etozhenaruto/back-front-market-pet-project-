@@ -1,8 +1,7 @@
 package com.beertestshop.config;
 
-import com.beertestshop.service.InMemoryFeedbackService;
-import com.beertestshop.service.InMemoryProductService;
-import com.beertestshop.service.InMemoryUserService;
+import com.beertestshop.service.FeedbackService;
+import com.beertestshop.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -17,9 +16,8 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class DataInitializer {
 
-    private final InMemoryUserService userService;
-    private final InMemoryProductService productService;
-    private final InMemoryFeedbackService feedbackService;
+    private final ProductService productService;
+    private final FeedbackService feedbackService;
 
     /**
      * CommandLineRunner для инициализации тестовых данных после запуска приложения.
@@ -29,7 +27,6 @@ public class DataInitializer {
         return args -> {
             log.info("=== Starting test data initialization ===");
 
-            userService.initTestData();
             productService.initTestData();
             feedbackService.initTestData();
 

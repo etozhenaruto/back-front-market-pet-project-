@@ -10,11 +10,13 @@ Pet-проект для практики автотестов — интерне
 
 ## 🚀 Установка и запуск
 
-### 1. Клонирование/копирование проекта
+### Вариант 1: Локальный запуск (без Docker)
+
+#### 1. Клонирование/копирование проекта
 
 Убедитесь, что проект находится в папке без кириллических символов в пути (опционально, но рекомендуется).
 
-### 2. Сборка проекта
+#### 2. Сборка проекта
 
 Откройте терминал в папке проекта и выполните:
 
@@ -22,7 +24,7 @@ Pet-проект для практики автотестов — интерне
 mvn clean package -DskipTests
 ```
 
-### 3. Запуск приложения
+#### 3. Запуск приложения
 
 ```bash
 mvn spring-boot:run
@@ -34,12 +36,41 @@ mvn spring-boot:run
 java -jar target/beer-test-shop-0.0.1-SNAPSHOT.jar
 ```
 
-### 4. Проверка работы
+#### 4. Проверка работы
 
 После запуска откройте в браузере:
 
 - **Swagger UI:** http://localhost:8080/swagger-ui.html
 - **API Docs:** http://localhost:8080/api-docs
+
+### Вариант 2: Запуск через Docker Compose (рекомендуется)
+
+#### Требования
+- **Docker Desktop** или **Docker Engine 20+**
+- **Docker Compose 2.0+**
+
+#### 1. Сборка и запуск контейнеров
+
+```bash
+docker-compose up --build
+```
+
+#### 2. Проверка работы
+
+- **Swagger UI:** http://localhost:8080/swagger-ui.html
+- **PostgreSQL:** localhost:5432 (БД: beertestshop, пользователь: beertestshop, пароль: beertestshop123)
+
+#### 3. Остановка контейнеров
+
+```bash
+docker-compose down
+```
+
+Для удаления данных БД (volume):
+
+```bash
+docker-compose down -v
+```
 
 ## 🔐 Тестовые учётные данные
 
@@ -79,10 +110,12 @@ java -jar target/beer-test-shop-0.0.1-SNAPSHOT.jar
 - **Spring Boot 3.2.3**
 - **Spring Security** (Cookie-based сессия)
 - **Spring Validation**
+- **Spring Data JPA**
 - **Lombok**
 - **SpringDoc OpenAPI** (Swagger)
 - **Maven**
-- **In-Memory хранилище** (ConcurrentHashMap)
+- **PostgreSQL 16**
+- **Docker & Docker Compose**
 
 ## 📝 Инициализация данных
 
@@ -117,8 +150,8 @@ springdoc.swagger-ui.path=/swagger-ui.html
 
 ## 📌 Ограничения
 
-- **Без базы данных** — все данные хранятся в оперативной памяти
-- При перезапуске приложения все данные сбрасываются
+- **Авторизация в памяти** — пользователи хранятся в оперативной памяти (InMemoryUserService)
+- **Данные в PostgreSQL** — продукты, отзывы, корзины сохраняются в БД
 - Лимит добавления товара в корзину: **5 шт одного товара**
 - Нельзя добавить в корзину больше, чем есть на складе
 

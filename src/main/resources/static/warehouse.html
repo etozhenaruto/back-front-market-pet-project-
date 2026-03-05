@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель склада - BeerTestShop</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom styles -->
+    <link href="/css/styles.css" rel="stylesheet">
+    <style>
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.35em 0.65em;
+        }
+        .table-img {
+            width: 60px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        .action-buttons {
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/" data-testid="nav-brand">
+                <i class="bi bi-cup-straw"></i> BeerTestShop
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/" data-testid="nav-home">Главная</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/catalog.html" data-testid="nav-catalog">Каталог</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/feedback.html" data-testid="nav-feedback">Отзывы</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/cart.html" data-testid="nav-cart">
+                            <i class="bi bi-cart"></i> Корзина
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/warehouse.html" data-testid="nav-warehouse">
+                            <i class="bi bi-box-seam"></i> Склад
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <main class="flex-grow-1 py-4">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 data-testid="warehouse-title">Панель склада</h1>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal" data-testid="btn-add-product">
+                    <i class="bi bi-plus-lg"></i> Добавить товар
+                </button>
+            </div>
+
+            <!-- Уведомления -->
+            <div id="notification-container" class="toast-container" aria-live="polite"></div>
+
+            <!-- Индикатор загрузки -->
+            <div id="loading-spinner" class="loading-spinner" data-testid="loading-spinner">
+                <div class="spinner-border text-warning" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+            </div>
+
+            <!-- Таблица товаров -->
+            <div class="card shadow-sm" data-testid="warehouse-table-container">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Товары на складе</h5>
+                        <span class="badge bg-primary" id="products-count">0 товаров</span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="products-table" data-testid="products-table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 60px;">Фото</th>
+                                    <th>Название</th>
+                                    <th>Описание</th>
+                                    <th style="width: 100px;">Цена</th>
+                                    <th style="width: 100px;">Количество</th>
+                                    <th style="width: 80px;">Статус</th>
+                                    <th style="width: 180px;">Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="products-tbody">
+                                <!-- Товары будут загружены через JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сообщение если нет товаров -->
+            <div id="no-products" class="text-center py-5 d-none" data-testid="no-products">
+                <i class="bi bi-basket" style="font-size: 4rem; color: #dee2e6;"></i>
+                <h3 class="mt-3 text-muted">Товары не найдены</h3>
+                <p class="text-muted">Добавьте первый товар на склад</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0" data-testid="footer-copyright">
+                        &copy; 2026 BeerTestShop. Все права защищены.
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" data-testid="footer-about">О нас</a> |
+                    <a href="#" data-testid="footer-contact">Контакты</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Модальное окно добавления/редактирования товара -->
+    <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productModalLabel" data-testid="modal-title">Добавить товар</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="productForm" data-testid="product-form">
+                        <input type="hidden" id="productId">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="productName" class="form-label">Название *</label>
+                                <input type="text" class="form-control" id="productName" required 
+                                       data-testid="input-product-name" placeholder="Например: Light Lager">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="productPrice" class="form-label">Цена (₽) *</label>
+                                <input type="number" class="form-control" id="productPrice" required min="0.01" step="0.01" 
+                                       data-testid="input-product-price" placeholder="150.00">
+                            </div>
+                            <div class="col-12">
+                                <label for="productDescription" class="form-label">Описание</label>
+                                <textarea class="form-control" id="productDescription" rows="3" 
+                                          data-testid="input-product-description" placeholder="Описание товара..."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="productQuantity" class="form-label">Количество на складе *</label>
+                                <input type="number" class="form-control" id="productQuantity" required min="0" 
+                                       data-testid="input-product-quantity" placeholder="10">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="productImageUrl" class="form-label">URL изображения</label>
+                                <input type="url" class="form-control" id="productImageUrl" 
+                                       data-testid="input-product-image" placeholder="https://example.com/image.jpg">
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="productActive" checked 
+                                           data-testid="input-product-active">
+                                    <label class="form-check-label" for="productActive">
+                                        Активен (отображается в каталоге)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-testid="btn-modal-cancel">Отмена</button>
+                    <button type="button" class="btn btn-primary" id="saveProductBtn" data-testid="btn-modal-save">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно подтверждения удаления -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel" data-testid="delete-modal-title">Подтверждение удаления</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Вы уверены, что хотите удалить товар <strong id="deleteProductName"></strong>?</p>
+                    <p class="text-danger small">Это действие нельзя отменить.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-testid="btn-delete-cancel">Отмена</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn" data-testid="btn-delete-confirm">Удалить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Скрипт панели склада -->
+    <script>
+        // API endpoints
+        const API_BASE = '/api/v1';
+        const PRODUCTS_ENDPOINT = `${API_BASE}/products`;
+        const PRODUCTS_ALL_ENDPOINT = `${API_BASE}/products/all`;
+
+        // DOM элементы
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const productsTable = document.getElementById('products-table');
+        const productsTbody = document.getElementById('products-tbody');
+        const productsCount = document.getElementById('products-count');
+        const noProducts = document.getElementById('no-products');
+        const productModal = new bootstrap.Modal(document.getElementById('productModal'));
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        const productForm = document.getElementById('productForm');
+        const saveProductBtn = document.getElementById('saveProductBtn');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+        // Текущий товар для редактирования/удаления
+        let currentProductId = null;
+        let currentProductName = null;
+
+        // Показывать/скрывать загрузку
+        function showLoading(show) {
+            loadingSpinner.style.display = show ? 'block' : 'none';
+            productsTable.style.display = show ? 'none' : 'table';
+            noProducts.classList.toggle('d-none', show);
+        }
+
+        // Показать уведомление
+        function showNotification(message, type = 'success') {
+            const container = document.getElementById('notification-container');
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type} border-0 show`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Загрузка всех товаров
+        async function loadProducts() {
+            showLoading(true);
+            try {
+                const response = await fetch(PRODUCTS_ALL_ENDPOINT);
+                if (!response.ok) throw new Error('Ошибка загрузки');
+                const products = await response.json();
+                renderProducts(products);
+            } catch (error) {
+                console.error('Error loading products:', error);
+                showNotification('Ошибка загрузки товаров', 'danger');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Отрисовка товаров
+        function renderProducts(products) {
+            productsTbody.innerHTML = '';
+            productsCount.textContent = `${products.length} товаров`;
+
+            if (products.length === 0) {
+                productsTable.style.display = 'none';
+                noProducts.classList.remove('d-none');
+                return;
+            }
+
+            productsTable.style.display = 'table';
+            noProducts.classList.add('d-none');
+
+            products.forEach(product => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <img src="${product.imageUrl || '/images/placeholder.png'}" 
+                             alt="${product.name}" 
+                             class="table-img"
+                             onerror="this.src='/images/placeholder.png'">
+                    </td>
+                    <td><strong>${product.name}</strong></td>
+                    <td class="text-muted small">${product.description || '—'}</td>
+                    <td>${product.price.toFixed(2)} ₽</td>
+                    <td>
+                        <span class="badge ${product.quantity > 0 ? 'bg-success' : 'bg-danger'} status-badge">
+                            ${product.quantity} шт.
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge ${product.isActive ? 'bg-success' : 'bg-secondary'} status-badge">
+                            ${product.isActive ? 'Активен' : 'Скрыт'}
+                        </span>
+                    </td>
+                    <td class="action-buttons">
+                        <button class="btn btn-sm btn-outline-primary me-1" 
+                                onclick="editProduct(${product.id})" 
+                                data-testid="btn-edit-${product.id}"
+                                title="Редактировать">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-${product.isActive ? 'secondary' : 'success'} me-1" 
+                                onclick="toggleProductStatus(${product.id})" 
+                                data-testid="btn-toggle-${product.id}"
+                                title="${product.isActive ? 'Скрыть' : 'Показать'}">
+                            <i class="bi bi-${product.isActive ? 'eye-slash' : 'eye'}"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" 
+                                onclick="deleteProduct(${product.id}, '${product.name}')" 
+                                data-testid="btn-delete-${product.id}"
+                                title="Удалить">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                `;
+                productsTbody.appendChild(tr);
+            });
+        }
+
+        // Открыть модальное окно для редактирования
+        function editProduct(id) {
+            fetch(`${PRODUCTS_ENDPOINT}/${id}`)
+                .then(response => response.json())
+                .then(product => {
+                    document.getElementById('productId').value = product.id;
+                    document.getElementById('productName').value = product.name;
+                    document.getElementById('productPrice').value = product.price;
+                    document.getElementById('productDescription').value = product.description || '';
+                    document.getElementById('productQuantity').value = product.quantity;
+                    document.getElementById('productImageUrl').value = product.imageUrl || '';
+                    document.getElementById('productActive').checked = product.isActive;
+                    
+                    document.getElementById('productModalLabel').textContent = 'Редактировать товар';
+                    currentProductId = product.id;
+                    productModal.show();
+                })
+                .catch(error => {
+                    console.error('Error loading product:', error);
+                    showNotification('Ошибка загрузки товара', 'danger');
+                });
+        }
+
+        // Сохранение товара (создание или обновление)
+        saveProductBtn.addEventListener('click', async () => {
+            const productId = document.getElementById('productId').value;
+            const data = {
+                name: document.getElementById('productName').value.trim(),
+                price: parseFloat(document.getElementById('productPrice').value),
+                description: document.getElementById('productDescription').value.trim(),
+                quantity: parseInt(document.getElementById('productQuantity').value),
+                imageUrl: document.getElementById('productImageUrl').value.trim(),
+                isActive: document.getElementById('productActive').checked
+            };
+
+            // Валидация
+            if (!data.name) {
+                showNotification('Введите название товара', 'danger');
+                return;
+            }
+            if (data.price <= 0) {
+                showNotification('Цена должна быть больше 0', 'danger');
+                return;
+            }
+            if (data.quantity < 0) {
+                showNotification('Количество не может быть отрицательным', 'danger');
+                return;
+            }
+
+            try {
+                const url = productId ? `${PRODUCTS_ENDPOINT}/${productId}` : PRODUCTS_ENDPOINT;
+                const method = productId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Ошибка сохранения');
+                }
+
+                productModal.hide();
+                showNotification(productId ? 'Товар обновлен' : 'Товар добавлен', 'success');
+                loadProducts();
+                
+                // Очистка формы
+                productForm.reset();
+                document.getElementById('productId').value = '';
+                document.getElementById('productModalLabel').textContent = 'Добавить товар';
+                currentProductId = null;
+            } catch (error) {
+                console.error('Error saving product:', error);
+                showNotification(`Ошибка: ${error.message}`, 'danger');
+            }
+        });
+
+        // Переключение статуса товара
+        function toggleProductStatus(id) {
+            fetch(`${PRODUCTS_ENDPOINT}/${id}/toggle-status`, { method: 'PUT' })
+                .then(response => {
+                    if (!response.ok) throw new Error('Ошибка');
+                    return response.json();
+                })
+                .then(product => {
+                    showNotification(
+                        product.isActive ? 'Товар активирован' : 'Товар скрыт', 
+                        'success'
+                    );
+                    loadProducts();
+                })
+                .catch(error => {
+                    console.error('Error toggling status:', error);
+                    showNotification('Ошибка изменения статуса', 'danger');
+                });
+        }
+
+        // Открыть модальное окно удаления
+        function deleteProduct(id, name) {
+            currentProductId = id;
+            currentProductName = name;
+            document.getElementById('deleteProductName').textContent = name;
+            deleteModal.show();
+        }
+
+        // Подтверждение удаления
+        confirmDeleteBtn.addEventListener('click', async () => {
+            if (!currentProductId) return;
+
+            try {
+                const response = await fetch(`${PRODUCTS_ENDPOINT}/${currentProductId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error('Ошибка удаления');
+
+                deleteModal.hide();
+                showNotification('Товар удален', 'success');
+                loadProducts();
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                showNotification('Ошибка удаления товара', 'danger');
+            }
+        });
+
+        // Закрытие модального окна - очистка формы
+        document.getElementById('productModal').addEventListener('hidden.bs.modal', () => {
+            if (!currentProductId) {
+                productForm.reset();
+                document.getElementById('productId').value = '';
+                document.getElementById('productModalLabel').textContent = 'Добавить товар';
+            }
+        });
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', loadProducts);
+    </script>
+</body>
+</html>

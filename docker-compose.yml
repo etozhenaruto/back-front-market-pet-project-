@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: beertestshop-postgres
+    environment:
+      POSTGRES_DB: beertestshop
+      POSTGRES_USER: beertestshop
+      POSTGRES_PASSWORD: beertestshop123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U beertestshop -d beertestshop"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - beertestshop-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: beertestshop-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/beertestshop
+      SPRING_DATASOURCE_USERNAME: beertestshop
+      SPRING_DATASOURCE_PASSWORD: beertestshop123
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    ports:
+      - "8080:8080"
+    networks:
+      - beertestshop-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  beertestshop-network:
+    driver: bridge

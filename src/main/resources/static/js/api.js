@@ -8,7 +8,7 @@ const API_BASE_URL = '/api/v1';
  */
 async function apiRequest(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
-    
+
     const defaultHeaders = {
         'Content-Type': 'application/json',
     };
@@ -23,32 +23,32 @@ async function apiRequest(endpoint, options = {}) {
 
     try {
         const response = await fetch(url, config);
-        
-        // Обработка 401 - неавторизован
-        if (response.status === 401) {
-            window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.pathname);
-            return null;
-        }
-        
-        // Обработка 403 - доступ запрещён
-        if (response.status === 403) {
-            alert('Доступ запрещён. Недостаточно прав для выполнения операции.');
-            return null;
-        }
-        
-        // Пустой ответ (204 No Content)
-        if (response.status === 204) {
-            return null;
-        }
-        
-        const data = await response.json();
-        
+
         if (!response.ok) {
-            console.error('API Error:', data);
-            throw new Error(data.message || 'Ошибка при выполнении запроса');
+            const contentType = response.headers.get('content-type');
+            let errorMessage = response.statusText;
+            
+            if (contentType && contentType.includes('application/json')) {
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || errorMessage;
+                } catch (e) {
+                    errorMessage = await response.text() || errorMessage;
+                }
+            } else {
+                errorMessage = await response.text() || errorMessage;
+            }
+            
+            console.error('API Error:', response.status, errorMessage);
+            throw new Error(errorMessage);
         }
-        
-        return data;
+
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return await response.json();
+        }
+
+        return [];
     } catch (error) {
         console.error('Request failed:', error);
         throw error;
@@ -63,13 +63,6 @@ async function getProducts() {
 
 async function getProductById(id) {
     return apiRequest(`/products/${id}`);
-}
-
-async function updateProduct(id, productData) {
-    return apiRequest(`/products/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(productData),
-    });
 }
 
 // ==================== Cart API ====================
@@ -108,90 +101,4 @@ async function createFeedback(feedbackData) {
         method: 'POST',
         body: JSON.stringify(feedbackData),
     });
-}
-
-async function updateFeedback(id, feedbackData) {
-    return apiRequest(`/feedback/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(feedbackData),
-    });
-}
-
-async function deleteFeedback(id) {
-    return apiRequest(`/feedback/${id}`, {
-        method: 'DELETE',
-    });
-}
-
-// ==================== Admin API ====================
-
-async function adminGetProducts() {
-    return apiRequest('/admin/products');
-}
-
-async function adminCreateProduct(productData) {
-    return apiRequest('/admin/products', {
-        method: 'POST',
-        body: JSON.stringify(productData),
-    });
-}
-
-async function adminUpdateProduct(id, productData) {
-    return apiRequest(`/admin/products/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(productData),
-    });
-}
-
-async function adminDeleteProduct(id) {
-    return apiRequest(`/admin/products/${id}`, {
-        method: 'DELETE',
-    });
-}
-
-async function adminGetFeedback() {
-    return apiRequest('/admin/feedback');
-}
-
-async function adminDeleteFeedback(id) {
-    return apiRequest(`/admin/feedback/${id}`, {
-        method: 'DELETE',
-    });
-}
-
-// ==================== Auth API ====================
-
-async function login(username, password) {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-    });
-    
-    if (response.status === 401) {
-        const data = await response.json();
-        throw new Error(data.message || 'Неверный логин или пароль');
-    }
-    
-    if (!response.ok) {
-        throw new Error('Ошибка аутентификации');
-    }
-    
-    return response.json();
-}
-
-async function logout() {
-    return apiRequest('/auth/logout', {
-        method: 'POST',
-    });
-}
-
-async function getCurrentUser() {
-    try {
-        return await apiRequest('/auth/me');
-    } catch (error) {
-        return null;
-    }
 }
