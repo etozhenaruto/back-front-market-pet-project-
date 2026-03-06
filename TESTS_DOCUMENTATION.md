@@ -99,15 +99,6 @@ mvn test -Dtest=FeedbackControllerTest
 mvn test -Dtest=CartControllerTest
 ```
 
-### Запуск с покрытием кода (JaCoCo)
-```bash
-mvn clean test jacoco:report
-```
-
-Отчет будет доступен в: `target/site/jacoco/index.html`
-
----
-
 ## Используемые технологии тестирования
 
 - **JUnit 5** - фреймворк для юнит тестирования
