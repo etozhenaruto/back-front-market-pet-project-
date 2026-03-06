@@ -14,6 +14,11 @@ on:
         required: false
         default: '**/*Test.java'
 
+# Права доступа для workflow
+permissions:
+  checks: write
+  contents: read
+
 env:
   JAVA_VERSION: '17'
 
